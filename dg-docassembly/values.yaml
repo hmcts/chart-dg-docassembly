@@ -44,8 +44,6 @@ dm-store:
   blobstorage:
     enabled: true
   java:
-#    postgresql:
-#      nameOverride: dm-store-db
     releaseNameOverride: chart-dg-docassembly-dm-store
     image: hmcts.azurecr.io/hmcts/dm-store:latest
     keyVaults:
