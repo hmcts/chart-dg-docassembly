@@ -7,8 +7,21 @@ global:
   subscriptionId: "bf308a5c-0624-4334-8ff8-8dca9fd43783"
   tenantId: "531ff96d-0ae9-462a-8d2d-bec7c0b42082"
 
+tags:
+  postgresql-pod: false                 # any chart specific postgres
+  blobstorage: true                     # blob storage for dm-store
+
 postgresql:
-  enabled: true
+  resources:
+    requests:
+      cpu: 25m
+  initdbScripts:
+    init.sql: |-
+      CREATE USER evidence WITH PASSWORD 'evidence';
+      CREATE DATABASE evidence WITH OWNER = evidence ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
+  nameOverride: postgres-db
+  persistence:
+    enabled: false
 
 ### EM SERVICES ###
 dg-docassembly:
@@ -31,8 +44,8 @@ dm-store:
   blobstorage:
     enabled: true
   java:
-    postgresql:
-      nameOverride: dm-store-db
+#    postgresql:
+#      nameOverride: dm-store-db
     releaseNameOverride: chart-dg-docassembly-dm-store
     image: hmcts.azurecr.io/hmcts/dm-store:latest
     keyVaults:
@@ -44,6 +57,7 @@ dm-store:
     environment:
       IDAM_USER_BASE_URI: http://idam-api-idam-saat.service.core-compute-idam-saat.internal
       IDAM_S2S_BASE_URI: http://chart-dg-docassembly-rpe-s2s
-      SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-dm-store-db:5432/evidence'
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-postgres-db:5432/evidence'
       ENABLE_DB_MIGRATE: 'true'
       ENABLE_TTL: 'false'
+
