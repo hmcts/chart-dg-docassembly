@@ -1,0 +1,17 @@
+dependencies:
+  - name: dg-docassembly
+    version: ~0.0.3
+    repository: '@hmcts'
+
+#    # Non-EM dependencies - find out chart names and versions
+  - name: rpe-service-auth-provider
+    version: ~0.0.3
+    repository: '@hmcts'
+
+  - name: dm-store
+    version: ~1.0.1
+    repository: '@hmcts'
+
+#  - Should I skip IDAM? Yes, no supported IDAM docker images.
+#  - Should I skip smtp-server? Yes, probably.
+#  - IDAM might use it, but we're using SAAT idam, so we don't care if it uses it.
