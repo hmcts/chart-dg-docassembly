@@ -11,18 +11,6 @@ tags:
   postgresql-pod: false                 # any chart specific postgres
   blobstorage: false                     # blob storage for dm-store
 
-postgresql:
-  resources:
-    requests:
-      cpu: 25m
-  initdbScripts:
-    init.sql: |-
-      CREATE USER evidence WITH PASSWORD 'evidence';
-      CREATE DATABASE evidence WITH OWNER = evidence ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
-  nameOverride: postgres-db
-  persistence:
-    enabled: false
-
 ### EM SERVICES ###
 dg-docassembly:
   docassembly-api:
@@ -48,9 +36,22 @@ dm-store:
     environment:
       IDAM_USER_BASE_URI: https://idam-api.aat.platform.hmcts.net
       IDAM_S2S_BASE_URI: http://rpe-s2s
-      SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-postgres-db:5432/evidence'
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-product-ci-test-postgresl:5432/evidence'
+      SPRING_DATASOURCE_USERNAME: hmcts
+      SPRING_DATASOURCE_PASSWORD: hmcts
       ENABLE_DB_MIGRATE: 'true'
       ENABLE_TTL: 'false'
-      CCD_DM_STORE_STORAGE_ACC_PRIMARY_CONN_STRING: 'dm-store-storage-account-primary-connection-string'
-      CCD_DM_STORE_STORAGE_ACC_SECONDARY_CONN_STRING: 'dm-store-storage-account-secondary-connection-string'
+      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=AAAAAAAAAAAAAAAA;AccountKey=AAAAAAAAAAAAAAAA;EndpointSuffix=core.windows.net'
 
+postgresql:
+  resources:
+    requests:
+      cpu: 25m
+  initdbScripts:
+    init.sql: |-
+      CREATE DATABASE "evidence" WITH OWNER = hmcts ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
+  postgresqlUsername: hmcts
+  postgresqlPassword: hmcts
+  postgresqlDatabase: user-profile
+  persistence:
+    enabled: false
