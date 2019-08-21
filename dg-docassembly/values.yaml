@@ -2,14 +2,50 @@
 # Then they could override dg-docassembly microservice chart to add their team to the s2s whitelist.
 # Note that this would go in their product chart, not this one.
 
-global:
-  environment: saat
-  subscriptionId: "bf308a5c-0624-4334-8ff8-8dca9fd43783"
-  tenantId: "531ff96d-0ae9-462a-8d2d-bec7c0b42082"
-
 tags:
   postgresql-pod: false                 # any chart specific postgres
-  blobstorage: true                     # blob storage for dm-store
+  blobstorage: false                     # blob storage for dm-store
+
+### EM SERVICES ###
+dg-docassembly:
+  docassembly-api:
+    image: hmctspublic.azurecr.io/dg/docassembly:latest
+    environment:
+      DM_STORE_APP_URL: http://dg-docassembly-dm-store
+      IDAM_API_BASE_URI: https://idam-api.aat.platform.hmcts.net
+      S2S_BASE_URI: http://dg-docassembly-rpe-s2s
+      DOCMOSIS_TEMPLATES_ENDPOINT: https://docmosis-development.platform.hmcts.net
+      DOCMOSIS_ENDPOINT: https://docmosis-development.platform.hmcts.net/rs/render
+
+###### DEPENDENCIES #####
+rpe-service-auth-provider:
+  java:
+    releaseNameOverride: dg-docassembly-rpe-s2s
+    image: hmctspublic.azurecr.io/rpe/service-auth-provider:latest
+
+dm-store:
+  java:
+    releaseNameOverride: dg-docassembly-dm-store
+    image: hmctspublic.azurecr.io/dm/store:latest
+    secrets:
+      STORAGE_ACCOUNT_NAME:
+        disabled: true
+      STORAGE_ACCOUNT_KEY:
+        disabled: true
+      STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME:
+        disabled: true
+    keyVaults:
+    environment:
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-ci-test-postgresql:5432/evidence'
+      SPRING_DATASOURCE_USERNAME: hmcts
+      SPRING_DATASOURCE_PASSWORD: hmcts
+      ENABLE_DB_MIGRATE: 'true'
+      ENABLE_TTL: 'false'
+      ENABLE_AZURE_STORAGE_CONTAINER: 'false'
+      POSTGRES_STORAGE_ENABLED: 'true'
+      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=AAAAAAAAAAAAAAAA;AccountKey=AAAAAAAAAAAAAAAA;EndpointSuffix=core.windows.net'
+      IDAM_USER_BASE_URI: https://idam-api.aat.platform.hmcts.net
+      IDAM_S2S_BASE_URI: http://dg-docassembly-rpe-s2s
 
 postgresql:
   resources:
@@ -17,45 +53,9 @@ postgresql:
       cpu: 25m
   initdbScripts:
     init.sql: |-
-      CREATE USER evidence WITH PASSWORD 'evidence';
-      CREATE DATABASE evidence WITH OWNER = evidence ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
-  nameOverride: postgres-db
+      CREATE DATABASE "evidence" WITH OWNER = hmcts ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
+  postgresqlUsername: hmcts
+  postgresqlPassword: hmcts
+  postgresqlDatabase: user-profile
   persistence:
     enabled: false
-
-### EM SERVICES ###
-dg-docassembly:
-  docassembly-api:
-    image: hmcts.azurecr.io/hmcts/dg-docassembly:latest
-    environment:
-      DM_STORE_APP_URL: http://chart-dg-docassembly-dm-store
-      IDAM_API_BASE_URI: http://idam-api-idam-saat.service.core-compute-idam-saat.internal
-      S2S_BASE_URI: http://chart-dg-docassembly-rpe-s2s
-      DOCMOSIS_TEMPLATES_ENDPOINT: https://docmosis-development.platform.hmcts.net
-      DOCMOSIS_ENDPOINT: https://docmosis-development.platform.hmcts.net/rs/render
-
-###### DEPENDENCIES #####
-rpe-service-auth-provider:
-  java:
-    releaseNameOverride: chart-dg-docassembly-rpe-s2s
-    image: hmcts.azurecr.io/hmcts/rpe-service-auth-provider:latest
-
-dm-store:
-  blobstorage:
-    enabled: true
-  java:
-    releaseNameOverride: chart-dg-docassembly-dm-store
-    image: hmcts.azurecr.io/hmcts/dm-store:latest
-    keyVaults:
-      ccd:
-        resourceGroup: ccd-shared
-        secrets:
-          - dm-store-storage-account-primary-connection-string
-          - dm-store-storage-account-secondary-connection-string
-    environment:
-      IDAM_USER_BASE_URI: http://idam-api-idam-saat.service.core-compute-idam-saat.internal
-      IDAM_S2S_BASE_URI: http://chart-dg-docassembly-rpe-s2s
-      SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-postgres-db:5432/evidence'
-      ENABLE_DB_MIGRATE: 'true'
-      ENABLE_TTL: 'false'
-
