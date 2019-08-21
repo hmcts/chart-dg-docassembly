@@ -36,8 +36,6 @@ dm-store:
         disabled: true
     keyVaults:
     environment:
-      IDAM_USER_BASE_URI: https://idam-api.aat.platform.hmcts.net
-      IDAM_S2S_BASE_URI: http://dg-docassembly-rpe-s2s
       SPRING_DATASOURCE_URL: 'jdbc:postgresql://chart-dg-docassembly-ci-test-postgresql:5432/evidence'
       SPRING_DATASOURCE_USERNAME: hmcts
       SPRING_DATASOURCE_PASSWORD: hmcts
@@ -46,6 +44,8 @@ dm-store:
       ENABLE_AZURE_STORAGE_CONTAINER: 'false'
       POSTGRES_STORAGE_ENABLED: 'true'
       STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=AAAAAAAAAAAAAAAA;AccountKey=AAAAAAAAAAAAAAAA;EndpointSuffix=core.windows.net'
+      IDAM_USER_BASE_URI: https://idam-api.aat.platform.hmcts.net
+      IDAM_S2S_BASE_URI: http://dg-docassembly-rpe-s2s
 
 postgresql:
   resources:
